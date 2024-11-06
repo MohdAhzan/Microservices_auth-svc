@@ -19,6 +19,7 @@ type jwtClaims struct{
     jwt.RegisteredClaims
     Id int64
     Email string
+    Role string
 }
 
 
@@ -26,6 +27,30 @@ func (w *JwtWrapper) GenerateToken(user models.Users) (signedToken string, err e
 	claims := &jwtClaims{
 		Id:    user.Id,
 		Email: user.Email,
+    Role :"user",
+
+		RegisteredClaims:  jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Local().Add(time.Hour * time.Duration(w.ExpiryHours))),
+			Issuer:    w.Issuer,
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	signedToken, err = token.SignedString([]byte(w.SecretKey))
+
+	if err != nil {
+		return "", err
+	}
+
+	return signedToken, nil
+}
+
+func (w *JwtWrapper) GenerateAdminToken(admin models.Admin) (signedToken string, err error) {
+	claims := &jwtClaims{
+		Id:    admin.Id,
+		Email: admin.Email,
+    Role :"admin",
 
 		RegisteredClaims:  jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Local().Add(time.Hour * time.Duration(w.ExpiryHours))),

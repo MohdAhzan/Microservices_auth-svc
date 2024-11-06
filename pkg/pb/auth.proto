@@ -9,14 +9,16 @@ service AuthService {
   rpc Register(RegisterRequest) returns (RegisterResponse){}
   rpc Login(LoginRequest) returns (LoginResponse){}
   rpc JwtValidate(JwtRequest) returns (JwtResponse){}
+  rpc AdminLogin(AdminLoginRequest) returns (AdminLoginResponse){}
 
 }
 
 
 
 message RegisterRequest{
-  string email = 1;
-  string password = 2;
+  string name = 1;
+  string email = 2;
+  string password = 3;
 }
 
 message RegisterResponse{
@@ -35,12 +37,24 @@ message LoginResponse{
   string error = 2;
 }
 
+message AdminLoginRequest{
+  string email = 1;
+  string password = 2;
+}
+
+message AdminLoginResponse{
+  int64 status = 1;
+  string jwtToken = 3;
+  string error = 2;
+}
 message JwtRequest{
   string jwtToken =1;
+  string role = 2;
 }
 
 message JwtResponse{
   int64 status = 1;
-  int64 userId = 3;
-  string error = 2;
+  int64 userId = 2;
+  string role =3;
+  string error = 4;
 }

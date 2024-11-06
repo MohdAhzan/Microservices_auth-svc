@@ -7,6 +7,7 @@ import (
 	"github.com/MohdAhzan/auth-svc/pkg/config"
 	"github.com/MohdAhzan/auth-svc/pkg/models"
 	_ "github.com/lib/pq"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -64,6 +65,33 @@ func DBconnect(cfg config.Config)(Repository,error){
     return Repository{},err
   }
   
+  err=CheckAndCreateAdmin(cfg,DB)
+  if err!=nil{
+    return Repository{},err
+  }
   return Repository{DB: DB},nil
+}
+
+
+func CheckAndCreateAdmin(cfg config.Config, db *gorm.DB)error {
+	var count int64
+	db.Model(&models.Admin{}).Count(&count)
+	if count == 0 {
+		password := cfg.ADMINPassword
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+		if err != nil {
+			return err
+		}
+		admin := models.Admin{
+			Id:       1,
+			Name:     cfg.ADMINName,
+			Email:    cfg.ADMINEmail,
+			Password: string(hashedPassword),
+		}
+
+		db.Create(&admin)
+	}
+
+    return nil
 }
 
